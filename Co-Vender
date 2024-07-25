@@ -1,1 +1,123 @@
+// design code
+module vending_machine(clk,rst,input_amount,given,amount_refund);
+  input clk,rst;
+  input bit [1:0]input_amount;
+  output logic given;
+  output logic [1:0]amount_refund;
+  
+  reg [1:0]n_state,c_state;
+  
+  parameter s0=2'b00;
+  parameter s1=2'b01;
+  parameter s2=2'b10; 
+  initial
+    begin
+      $display("WELCOME TO THE CO-Vender. WHY DON'T YOU TAKE COFFEE, SIP IT N FLIP IT");
+      $display("following are the states i.e. adding nothing, add 4 rs and adding 8rs respectively");
+      $display("s0=%b",s0);
+      $display("s1=%b",s1);
+      $display("s2=%b",s2);
+    end
+  
+  always@(posedge clk)
+    begin 
+      if(rst==1)
+        begin
+          c_state<=2'b00;
+           amount_refund<=2'b00;
+           given<=0;
+        end
+      else
+        begin
+          c_state<=n_state;
+        end
+      if(c_state==s0)
+        begin
+          if(input_amount==2'b00)
+            begin
+              n_state<=s0;
+              given=0;
+              amount_refund<=2'b00;
+            end
+          else if(input_amount==2'b01)
+            begin
+              n_state<=s1;
+              given=0;
+              amount_refund<=2'b00;
+            end
+          else if(input_amount==2'b10)
+            begin
+              n_state<=s2;
+              given=0;
+              amount_refund<=2'b00;
+            end
+        end
+      else if(c_state==s1)
+        begin
+          if(input_amount==2'b00)
+            begin
+              n_state<=s0;
+              given=0;
+              amount_refund<=2'b01;
+            end
+          else if(input_amount==2'b01)
+            begin
+              n_state<=s2;
+              given=0;
+              amount_refund<=2'b00;
+            end
+          else if(input_amount==2'b10)
+            begin
+              n_state<=s0;
+              given=1;
+              amount_refund<=2'b00;
+            end
+        end
+      else if(c_state==s2)
+        begin
+          if(input_amount==2'b00)
+            begin
+              n_state<=s0;
+              given=0;
+              amount_refund<=2'b10;
+            end
+          else if(input_amount==2'b01)
+            begin
+              n_state<=s0;
+              given=1;
+              amount_refund<=2'b00;
+            end
+          else if(input_amount==2'b10)
+            begin
+              n_state<=s0;
+              given=1;
+              amount_refund<=2'b01;
+            end
+        end
+    end
+  
+endmodule
 
+//testbench
+module tb();
+  reg clk,rst;
+  wire given;
+  reg [1:0]input_amount;
+  wire [1:0]amount_refund;
+  vending_machine dut(.clk(clk),.rst(rst),.given(given),.input_amount(input_amount),.amount_refund(amount_refund));
+  
+  initial 
+    begin 
+      $dumpfile("vending_machine.vcd");
+      $dumpvars(0,tb);
+      rst=1;
+      clk=0;
+      #6
+      rst=0;
+      clk=1;
+       input_amount="10";
+      #11 input_amount="00";
+      #16 input_amount="01";
+       $finish;
+    end
+endmodule
